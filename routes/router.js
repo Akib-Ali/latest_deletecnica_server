@@ -163,7 +163,7 @@ router.post("/post-newblog", verifyToken, async (req, res) => {
 
 //get api 
 
-router.get('/blog-list', verifyToken, async (req, res) => {
+router.get('/blog-list',  async (req, res) => {
   let bloglist = await Blog.find().sort({ createdAt: -1 });
   if (bloglist.length > 0) {
     res.send(bloglist)
