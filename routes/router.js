@@ -3,6 +3,7 @@ const router = new express.Router();
 const conn = require('../db/conn')
 const Blog = require("../db/blog")
 const User = require("../db/user")
+const Comment = require("../db/comment")
 const multer = require("multer")
 const fs = require('fs');
 const path = require('path');
@@ -237,6 +238,69 @@ router.delete('/delete-blog/:_id', verifyToken, async (req, res) => {
   res.send(deleteselectedblog)
 
 })
+
+
+//customer comment api 
+
+router.post("/post-comment",  async (req, res) => {
+  try {
+    const { client_name, client_email, client_message } = req.body;
+    console.log(req.body)
+
+    const newComment = new Comment({
+     client_name, 
+     client_email, 
+     client_message,
+      createdAt: Date.now()
+
+    })
+
+    let result = await newComment.save();
+    res.send(result)
+
+  } catch (error) {
+    console.log(error)
+
+  }
+  // console.log(req.body
+
+})
+
+
+
+//comment get api 
+
+router.get('/comment-list',  async (req, res) => {
+  let commentlist = await Comment.find().sort({ createdAt: -1 });
+  if (commentlist.length > 0) {
+    res.send(commentlist)
+  } else {
+    res.send({ result: "No Result found" })
+  }
+
+})
+
+//comment delete api 
+
+router.delete('/delete-comment/:_id',  async (req, res) => {
+  let deleteselectedcomment = await Comment.deleteOne(req.params)
+  res.send(deleteselectedcomment)
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //mail
