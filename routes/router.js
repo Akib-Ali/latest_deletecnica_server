@@ -244,13 +244,14 @@ router.delete('/delete-blog/:_id', verifyToken, async (req, res) => {
 
 router.post("/post-comment",  async (req, res) => {
   try {
-    const { client_name, client_email, client_message } = req.body;
+    const { client_name, client_email, client_message , admin_approved } = req.body;
     console.log(req.body)
 
     const newComment = new Comment({
      client_name, 
      client_email, 
      client_message,
+     admin_approved,
       createdAt: Date.now()
 
     })

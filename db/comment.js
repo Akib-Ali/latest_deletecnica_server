@@ -15,6 +15,11 @@ const commentSchema = new mongoose.Schema({
         type: String,
         required:true
     },
+
+    admin_approved:{
+        type:String,
+        required:true
+    },
    
     createdAt:{
         type:Date,
