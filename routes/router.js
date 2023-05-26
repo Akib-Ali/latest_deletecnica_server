@@ -164,7 +164,7 @@ router.post("/post-newblog", verifyToken, async (req, res) => {
 
 //get api 
 
-router.get('/blog-list',  async (req, res) => {
+router.get('/blog-list', async (req, res) => {
   let bloglist = await Blog.find().sort({ createdAt: -1 });
   if (bloglist.length > 0) {
     res.send(bloglist)
@@ -242,16 +242,16 @@ router.delete('/delete-blog/:_id', verifyToken, async (req, res) => {
 
 //customer comment api 
 
-router.post("/post-comment",  async (req, res) => {
+router.post("/post-comment", async (req, res) => {
   try {
-    const { client_name, client_email, client_message , admin_approved } = req.body;
+    const { client_name, client_email, client_message, admin_approved } = req.body;
     console.log(req.body)
 
     const newComment = new Comment({
-     client_name, 
-     client_email, 
-     client_message,
-     admin_approved,
+      client_name,
+      client_email,
+      client_message,
+      admin_approved,
       createdAt: Date.now()
 
     })
@@ -268,10 +268,32 @@ router.post("/post-comment",  async (req, res) => {
 })
 
 
+//customer update api
+
+router.post("/update-comment/:id", async (req, res) => {
+
+  try {
+    const { admin_approved } = req.body;
+    const result = await Comment.updateOne(
+      { _id: req.params.id },
+      { $set: req.body }
+    )
+    res.send(result)
+
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send("Internal server error")
+  }
+
+
+})
+
+
 
 //comment get api 
 
-router.get('/comment-list',  async (req, res) => {
+router.get('/comment-list', async (req, res) => {
   let commentlist = await Comment.find().sort({ createdAt: -1 });
   if (commentlist.length > 0) {
     res.send(commentlist)
@@ -283,11 +305,14 @@ router.get('/comment-list',  async (req, res) => {
 
 //comment delete api 
 
-router.delete('/delete-comment/:_id',  async (req, res) => {
+router.delete('/delete-comment/:_id', async (req, res) => {
   let deleteselectedcomment = await Comment.deleteOne(req.params)
   res.send(deleteselectedcomment)
 
 })
+
+
+
 
 
 
