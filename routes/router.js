@@ -1,3 +1,6 @@
+
+
+
 const express = require('express');
 const router = new express.Router();
 const conn = require('../db/conn')
@@ -176,14 +179,15 @@ router.get('/blog-list', async (req, res) => {
 
 //single blog api
 
-router.get('/blog/:id', async (req, res) => {
-  let result = await Blog.findOne({ _id: req.params.id })
+
+router.get('/blog/:blog_slug', async (req, res) => {
+  let result = await Blog.findOne({ blog_slug: req.params.blog_slug });
   if (result) {
-    res.send(result)
+    res.send(result);
   } else {
-    res.send({ result: "No Record found" })
+    res.send({ result: "No Record found" });
   }
-})
+});
 
 
 
