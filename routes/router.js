@@ -1,6 +1,3 @@
-
-
-
 const express = require('express');
 const router = new express.Router();
 const conn = require('../db/conn')
@@ -15,7 +12,7 @@ const jwtKey = "dela-axionic"
 const bcrypt = require("bcrypt")
 const publicPath = path.join(__dirname, '../public');
 router.use(express.static(publicPath));
-
+const SiteMap = require("../db/sitemap")
 
 //email 
 let nodemailer = require('nodemailer')
@@ -26,8 +23,6 @@ const creds = require("../credential.json")
 //authentication start
 
 //signup api
-
-
 router.post("/register-user", async (req, res) => {
   const { name, email, password } = req.body;
   const hashPassword = await bcrypt.hash(password, 10)
@@ -41,7 +36,6 @@ router.post("/register-user", async (req, res) => {
   result = result.toObject()
   delete result.password
   res.send(result)
-
 
 })
 
@@ -71,7 +65,6 @@ router.post("/login", async (req, res) => {
 
 
 //update user
-
 
 router.post("/userupdate/:id", async (req, res) => {
   try {
@@ -123,17 +116,7 @@ function verifyToken(req, res, next) {
 
 }
 
-
-
-
-
-
-
 //authentication end
-
-
-
-
 
 //post api
 
@@ -193,9 +176,7 @@ router.get('/blog/:blog_slug', async (req, res) => {
 
 //update api
 
-
-
-router.post("/blogupdate/:id", verifyToken, async (req, res) => {
+router.post("/blogupdate/:blog_slug", verifyToken, async (req, res) => {
   try {
     const { blog_title, blog_slug, blog_summary, blog_keyword, blog_content, pic } = req.body;
     console.log(req.body, "reeived from backend")
@@ -222,7 +203,7 @@ router.post("/blogupdate/:id", verifyToken, async (req, res) => {
     }
 
     const result = await Blog.updateOne(
-      { _id: req.params.id },
+      { blog_slug: req.params.blog_slug },
       { $set: updateObject }
     );
 
@@ -235,13 +216,13 @@ router.post("/blogupdate/:id", verifyToken, async (req, res) => {
 
 
 
-//delete api
 
-router.delete('/delete-blog/:_id', verifyToken, async (req, res) => {
+//delete api
+router.delete('/delete-blog/:blog_slug', verifyToken, async (req, res) => {
   let deleteselectedblog = await Blog.deleteOne(req.params)
   res.send(deleteselectedblog)
-
 })
+
 
 
 //customer comment api 
@@ -309,28 +290,11 @@ router.get('/comment-list', async (req, res) => {
 
 //comment delete api 
 
-router.delete('/delete-comment/:_id', async (req, res) => {
+router.delete('/delete-comment/:_id',verifyToken, async (req, res) => {
   let deleteselectedcomment = await Comment.deleteOne(req.params)
   res.send(deleteselectedcomment)
 
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //mail
@@ -428,5 +392,82 @@ transporter.verify(function (err, success) {
   if (err) console.log(err)
   else console.log("Server is ready to take the emails")
 });
+
+
+
+
+//sitemap api
+
+
+router.post("/sitemap-blog",verifyToken, async (req, res) => {
+  try {
+    const { getSitemapblog, priority, blog_slug } = req.body;
+    console.log(req.body);
+
+    // Check if the data already exists in the database
+    const existingData = await SiteMap.findOne({ getSitemapblog, priority, blog_slug });
+
+    if (existingData) {
+      console.log('Data already exists in the database. Skipping save operation.');
+      return res.send(existingData);
+    }
+
+    const newSitemap = new SiteMap({
+      getSitemapblog,
+      priority,
+      blog_slug,
+      createdAt: Date.now()
+    });
+
+    let result = await newSitemap.save();
+    res.send(result);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
+//get Sitemap data 
+
+router.get("/all-sitemap", async (req, res) => {
+  let result = await SiteMap.find()
+  if (result.length > 0) {
+    res.send(result)
+  } else {
+    res.send({ result: "No Result found" })
+  }
+
+})
+
+
+router.delete('/delete-sitemap/:blog_slug', verifyToken, async (req, res) => {
+  let deleteselectedsitemap = await SiteMap.deleteOne(req.params)
+  res.send(deleteselectedsitemap)
+
+})
+
+router.post("/update-sitemap/:blog_slug",verifyToken, async (req, res) => {
+  try {
+    const { getSitemapblog , blog_slug } = req.body;
+    const result = await SiteMap.updateOne(
+      { blog_slug: req.params.blog_slug },
+      { $set: req.body }
+    )
+    res.send(result)
+
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send("Internal server error")
+  }
+
+
+})
+
+
+
+
+
+
 
 module.exports = router;

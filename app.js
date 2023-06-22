@@ -7,6 +7,7 @@ require('./db/conn')
 const cors = require('cors')
 const router = require('./routes/router')
 const creds = require("./credential.json")
+const createSitemap = require('express-sitemap-xml').createSitemap;
 
 
 app.use(bodyParser.json())
@@ -16,6 +17,7 @@ app.use(cors())
 app.use('/uploads', express.static('./uploads'))
 
 app.use(router)
+
 
 
 
